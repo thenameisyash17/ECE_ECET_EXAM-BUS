@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Page</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      background: #1f1f1f;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background: #333;
+      border: none;
+      border-radius: 5px;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #00ffff;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #00cccc;
+    }
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      color: lightgreen;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="text" id="loginID" placeholder="Login ID" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    function login() {
+      const id = document.getElementById("loginID").value;
+      const pass = document.getElementById("password").value;
+      const msg = document.getElementById("message");
+
+      if (id === "giveaccess" && pass === "device") {
+        msg.style.color = "lightgreen";
+        msg.textContent = "Login successful ✅ Redirecting...";
+        
+        // 👇 FAKE CAMERA ALERT HERE
+        setTimeout(() => {
+          alert("🔴 Webcam access granted. Camera is now recording sending to...");
+        }, 10); // Show after message is seen
+
+        // 👇 Redirect after delay
+        setTimeout(() => {
+          window.location.href = "smoke.html";
+        }, 2500); // 2.5 seconds total delay
+      } else {
+        msg.style.color = "red";
+        msg.textContent = "Invalid ID or Password ❌";
+      }
+    }
+  </script>
+</body>
+</html>

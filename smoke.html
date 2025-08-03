@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>System Error</title>
+  <style>
+    body {
+      background-color: #0000aa;
+      color: white;
+      font-family: Consolas, monospace;
+      font-size: 18px;
+      padding: 50px;
+    }
+    .center {
+      text-align: center;
+      margin-top: 100px;
+    }
+    .big {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <p class="big">💻 Your device ran into a problem and needs to restart.</p>
+    <p>We're just collecting some info, and then we'll restart for you.</p>
+    <p><span id="percent">0</span>% complete</p>
+    <p>Wait a few seconds, data will be transferred... <br> www.yourfiles.exposed/server-status</p>
+  </div>
+
+  <script>
+    let percent = 0;
+    let timer = setInterval(() => {
+      percent++;
+      document.getElementById("percent").innerText = percent;
+      if (percent >= 100) {
+        clearInterval(timer);
+
+        // Show "Data transfer" screen
+        setTimeout(() => {
+          document.body.innerHTML = `
+            <div class="center">
+              <h1>✅ Data transfer successfully</h1>
+              <p>All files sent to Yash's device.</p>
+              <p>Refresh the page to reset.</p>
+            </div>
+          `;
+
+          // After 4 seconds, show prank alert and redirect
+          setTimeout(() => {
+            alert("😄 This was a prank! Redirecting to the quiz...");
+            window.location.href = "quiz.html"; // Redirect to your quiz
+          }, 4000);
+        }, 2000); // Delay after loading 100%
+      }
+    }, 150); // 150ms x 100 = 15s progress duration
+  </script>
+</body>
+</html>

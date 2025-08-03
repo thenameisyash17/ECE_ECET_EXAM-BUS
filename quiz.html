@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cinematic Quiz App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(270deg, #000000, #000000, #202121, #dddde2);
+      background-size: 600% 600%;
+      animation: gradientMove 15s ease infinite;
+      color: #fff;
+      
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .quiz-container {
+      background: rgba(22, 33, 62, 0.8);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 30px #00f2ff, 0 0 50px #0077ff;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(to right, #2e9f4e, #0077ff);
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: pulseText 2s infinite;
+    }
+
+    @keyframes pulseText {
+      0% { text-shadow: 0 0 5px #00f2ff; }
+      50% { text-shadow: 0 0 15px #00f2ff, 0 0 25px #0077ff; }
+      100% { text-shadow: 0 0 5px #00f2ff; }
+    }
+
+    #question {
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    button {
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #0f3460;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: #00f2ff;
+      color: #13290c;
+      box-shadow: 0 0 20px #00f2ff, 0 0 30px #0077ff;
+    }
+
+    .correct {
+      background-color: #00ff9f;
+      color: black;
+    }
+
+    .wrong {
+      background-color: #ff3f3f;
+      color: white;
+    }
+
+    #next-btn {
+      margin-top: 25px;
+      background: #ff00c8;
+      display: none;
+      color: white;
+      box-shadow: 0 0 15px #ff00c8, 0 0 30px #00ff2a,0 0 30px #0077ff;
+    }
+
+    #next-btn:hover {
+      background: #ff0099;
+      transform: scale(1.1);
+    }
+      @import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap'); /* Monotype Corsiva alternative */
+
+    .yash-signature {
+  font-family: 'Monotype Corsiva', 'Lucida Handwriting', cursive;
+  font-size: 20px;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 60px;
+  animation: yashPulse 2s ease-in-out infinite alternate;
+}
+
+
+    @keyframes yashPulse {
+      from {
+        text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px #00f0ff;
+      }
+      to {
+        text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
+      }
+    }
+    .smoke {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(white, transparent);
+      border-radius: 50%;
+      filter: blur(8px);
+      animation: rise 5s linear infinite;
+      opacity: 0.1;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 0.2;
+      }
+      50% {
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateX(-50px) translateY(-600px) scale(2);
+        opacity: 0;
+      }
+    }
+
+    /* Multiple smokes with delay */
+    .smoke:nth-child(2) { animation-delay: 1s; left: 40%; }
+    .smoke:nth-child(3) { animation-delay: 2s; left: 60%; }
+    .smoke:nth-child(4) { animation-delay: 3s; left: 145%; }
+    .smoke:nth-child(5) { animation-delay: 4s; left: 100%; }
+    .yash-wrapper {
+      background-color: #101010;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body >
+<div  class="smoke"></div>
+  <div class="quiz-container">
+    <a class="yash-signature" href="https://www.instagram.com/thenameisyash._.17/" target="_blank">@thenameisyash._.17</a>
+    <div id="question-container">
+      <h2 id="question">Question text</h2>
+      <div id="answer-buttons" class="btn-grid"></div>
+    </div>
+    <button id="next-btn">Next</button>
+  </div>
+</div>
+  <script>
+    const questions = [
+  {
+    question: "Which diode is used as a voltage regulator?",
+    answers: [
+      { text: "Zener diode", correct: true },
+      { text: "Tunnel diode", correct: false },
+      { text: "Varactor diode", correct: false },
+      { text: "LED", correct: false }
+    ]
+  },
+  {
+    question: "What is the phase shift between input and output in a CE amplifier?",
+    answers: [
+      { text: "0°", correct: false },
+      { text: "90°", correct: false },
+      { text: "180°", correct: true },
+      { text: "360°", correct: false }
+    ]
+  },
+  {
+    question: "Which theorem simplifies a network to a voltage source and series resistance?",
+    answers: [
+      { text: "Thevenin’s Theorem", correct: true },
+      { text: "Norton’s Theorem", correct: false },
+      { text: "Superposition Theorem", correct: false },
+      { text: "Reciprocity Theorem", correct: false }
+    ]
+  },
+  {
+    question: "Which instrument is used to view waveforms of signals?",
+    answers: [
+      { text: "Multimeter", correct: false },
+      { text: "Signal Generator", correct: false },
+      { text: "LCR Meter", correct: false },
+      { text: "CRO", correct: true }
+    ]
+  },
+  {
+    question: "Which device belongs to the thyristor family and is used for switching?",
+    answers: [
+      { text: "SCR", correct: true },
+      { text: "MOSFET", correct: false },
+      { text: "Zener diode", correct: false },
+      { text: "BJT", correct: false }
+    ]
+  },
+  {
+    question: "Which modulation technique varies the frequency of the carrier wave?",
+    answers: [
+      { text: "Amplitude Modulation", correct: false },
+      { text: "Frequency Modulation", correct: true },
+      { text: "Phase Modulation", correct: false },
+      { text: "Pulse Code Modulation", correct: false }
+    ]
+  },
+  {
+    question: "Which memory is volatile?",
+    answers: [
+      { text: "ROM", correct: false },
+      { text: "EEPROM", correct: false },
+      { text: "RAM", correct: true },
+      { text: "Flash Memory", correct: false }
+    ]
+  },
+  {
+    question: "What is the function of a 555 Timer in astable mode?",
+    answers: [
+      { text: "Acts as a comparator", correct: false },
+      { text: "Works as an oscillator", correct: true },
+      { text: "Used as a regulator", correct: false },
+      { text: "Used as a filter", correct: false }
+    ]
+  },
+  {
+  question: "Which of the following is a unidirectional semiconductor device?",
+  answers: [
+    { text: "Zener diode", correct: false },
+    { text: "LED", correct: false },
+    { text: "PN junction diode", correct: true },
+    { text: "Photodiode", correct: false }
+  ]
+},
+{
+  question: "What is the use of a clamping circuit?",
+  answers: [
+    { text: "To remove a part of the signal", correct: false },
+    { text: "To amplify the signal", correct: false },
+    { text: "To shift the DC level of a signal", correct: true },
+    { text: "To convert AC to DC", correct: false }
+  ]
+},
+{
+  question: "Which logic gate gives a HIGH output only when all inputs are HIGH?",
+  answers: [
+    { text: "OR gate", correct: false },
+    { text: "NAND gate", correct: false },
+    { text: "AND gate", correct: true },
+    { text: "XOR gate", correct: false }
+  ]
+},
+{
+  question: "Which filter offers the best ripple rejection in power supplies?",
+  answers: [
+    { text: "LC filter", correct: false },
+    { text: "RC filter", correct: false },
+    { text: "CLC (π) filter", correct: true },
+    { text: "RL filter", correct: false }
+  ]
+},
+{
+  question: "What is the purpose of modulation in communication systems?",
+  answers: [
+    { text: "To reduce power", correct: false },
+    { text: "To increase bandwidth", correct: false },
+    { text: "To reduce noise", correct: false },
+    { text: "To allow long-distance transmission", correct: true }
+  ]
+},
+{
+  question: "Which device is used to convert digital signals to analog signals?",
+  answers: [
+    { text: "ADC", correct: false },
+    { text: "Counter", correct: false },
+    { text: "DAC", correct: true },
+    { text: "MUX", correct: false }
+  ]
+},
+{
+  question: "What is the function of an operational amplifier in an inverting mode?",
+  answers: [
+    { text: "It multiplies input", correct: false },
+    { text: "It adds signals", correct: false },
+    { text: "It outputs amplified and inverted signal", correct: true },
+    { text: "It outputs the same as input", correct: false }
+  ]
+},
+{
+  question: "Which microprocessor is known for 16-bit operations?",
+  answers: [
+    { text: "8085", correct: false },
+    { text: "8051", correct: false },
+    { text: "8086", correct: true },
+    { text: "Z80", correct: false }
+  ]
+},
+{
+  question: "Which protocol is used for email transmission?",
+  answers: [
+    { text: "HTTP", correct: false },
+    { text: "FTP", correct: false },
+    { text: "SMTP", correct: true },
+    { text: "SNMP", correct: false }
+  ]
+},
+{
+  question: "Which optical device is used to join two fiber cables permanently?",
+  answers: [
+    { text: "Connector", correct: false },
+    { text: "Splice", correct: true },
+    { text: "Coupler", correct: false },
+    { text: "Switch", correct: false }
+  ]
+},
+
+  {
+    question: "Which antenna provides unidirectional radiation and high gain?",
+    answers: [
+      { text: "Dipole antenna", correct: false },
+      { text: "Yagi-Uda antenna", correct: true },
+      { text: "Loop antenna", correct: false },
+      { text: "Whip antenna", correct: false }
+    ]
+  },
+  {
+  question: "Which oscillator uses both positive and negative feedback?",
+  answers: [
+    { text: "Hartley Oscillator", correct: false },
+    { text: "Wien Bridge Oscillator", correct: true },
+    { text: "Colpitts Oscillator", correct: false },
+    { text: "Phase Shift Oscillator", correct: false }
+  ]
+},
+{
+  question: "What is the primary function of a differential amplifier?",
+  answers: [
+    { text: "Amplifies only AC signals", correct: false },
+    { text: "Rejects common-mode signals", correct: true },
+    { text: "Acts as a low pass filter", correct: false },
+    { text: "Generates sine waves", correct: false }
+  ]
+},
+{
+  question: "Which digital modulation technique has the highest bandwidth efficiency?",
+  answers: [
+    { text: "ASK", correct: false },
+    { text: "FSK", correct: false },
+    { text: "PSK", correct: false },
+    { text: "QAM", correct: true }
+  ]
+},
+{
+  question: "Which transmission line parameter defines power transfer efficiency?",
+  answers: [
+    { text: "Impedance", correct: false },
+    { text: "SWR", correct: true },
+    { text: "Resistance", correct: false },
+    { text: "Capacitance", correct: false }
+  ]
+},
+{
+  question: "Which logic family offers the highest speed?",
+  answers: [
+    { text: "TTL", correct: false },
+    { text: "ECL", correct: true },
+    { text: "CMOS", correct: false },
+    { text: "RTL", correct: false }
+  ]
+},
+{
+  question: "Which register holds the memory address in microprocessors?",
+  answers: [
+    { text: "Accumulator", correct: false },
+    { text: "Instruction Register", correct: false },
+    { text: "Program Counter", correct: false },
+    { text: "Memory Address Register", correct: true }
+  ]
+},
+{
+  question: "Which component is used in SMPS for voltage regulation?",
+  answers: [
+    { text: "Transformer", correct: false },
+    { text: "SCR", correct: false },
+    { text: "MOSFET", correct: true },
+    { text: "Diode", correct: false }
+  ]
+},
+{
+  question: "What is the advantage of TDMA in mobile communication?",
+  answers: [
+    { text: "Higher power consumption", correct: false },
+    { text: "Better noise immunity", correct: false },
+    { text: "Multiple users can share the same frequency", correct: true },
+    { text: "More bandwidth required", correct: false }
+  ]
+},
+{
+  question: "Which fiber type is best for long-distance communication?",
+  answers: [
+    { text: "Multimode step index", correct: false },
+    { text: "Multimode graded index", correct: false },
+    { text: "Single-mode fiber", correct: true },
+    { text: "Plastic fiber", correct: false }
+  ]
+},
+{
+  question: "What is the typical range of voltage for logic HIGH in TTL logic?",
+  answers: [
+    { text: "0V to 0.8V", correct: false },
+    { text: "0.8V to 2V", correct: false },
+    { text: "2V to 5V", correct: true },
+    { text: "Above 5V", correct: false }
+  ]
+},
+{
+  question: "Which filter type allows a specific frequency band to pass?",
+  answers: [
+    { text: "Low-pass filter", correct: false },
+    { text: "High-pass filter", correct: false },
+    { text: "Band-pass filter", correct: true },
+    { text: "Notch filter", correct: false }
+  ]
+},
+{
+  question: "Which flip-flop is called a basic building block for sequential circuits?",
+  answers: [
+    { text: "T Flip-Flop", correct: false },
+    { text: "SR Flip-Flop", correct: true },
+    { text: "JK Flip-Flop", correct: false },
+    { text: "D Flip-Flop", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a unipolar transistor?",
+  answers: [
+    { text: "BJT", correct: false },
+    { text: "UJT", correct: false },
+    { text: "MOSFET", correct: true },
+    { text: "SCR", correct: false }
+  ]
+},
+{
+  question: "Which parameter of an antenna defines the sharpness of its beam?",
+  answers: [
+    { text: "Gain", correct: false },
+    { text: "Bandwidth", correct: false },
+    { text: "Beamwidth", correct: true },
+    { text: "Efficiency", correct: false }
+  ]
+},
+{
+  question: "Which layer in OSI model handles routing and forwarding?",
+  answers: [
+    { text: "Transport Layer", correct: false },
+    { text: "Data Link Layer", correct: false },
+    { text: "Network Layer", correct: true },
+    { text: "Session Layer", correct: false }
+  ]
+},
+{
+  question: "What is the use of a Schmitt Trigger?",
+  answers: [
+    { text: "Amplifies small signals", correct: false },
+    { text: "Removes noise from digital signals", correct: true },
+    { text: "Multiplies signals", correct: false },
+    { text: "Mixes two signals", correct: false }
+  ]
+},
+{
+  question: "What type of feedback is used in oscillators?",
+  answers: [
+    { text: "Positive feedback", correct: true },
+    { text: "Negative feedback", correct: false },
+    { text: "Regenerative feedback", correct: false },
+    { text: "None", correct: false }
+  ]
+},
+{
+  question: "Which part of the electromagnetic spectrum is used for satellite communication?",
+  answers: [
+    { text: "Visible light", correct: false },
+    { text: "Microwaves", correct: true },
+    { text: "Infrared", correct: false },
+    { text: "Ultraviolet", correct: false }
+  ]
+},
+{
+  question: "Which diode is used in RF applications for tuning?",
+  answers: [
+    { text: "Zener diode", correct: false },
+    { text: "Varactor diode", correct: true },
+    { text: "Tunnel diode", correct: false },
+    { text: "Photodiode", correct: false }
+  ]
+},
+{
+  question: "Which amplifier provides high gain and is used at radio frequencies?",
+  answers: [
+    { text: "Class A amplifier", correct: false },
+    { text: "Tuned amplifier", correct: true },
+    { text: "Class B amplifier", correct: false },
+    { text: "Power amplifier", correct: false }
+  ]
+},
+{
+  question: "Which method is used to convert analog signals into digital?",
+  answers: [
+    { text: "Demodulation", correct: false },
+    { text: "Sampling and quantization", correct: true },
+    { text: "Amplification", correct: false },
+    { text: "Multiplexing", correct: false }
+  ]
+},
+{
+  question: "What is the bandwidth of AM signal?",
+  answers: [
+    { text: "Equal to modulating signal", correct: false },
+    { text: "Twice the modulating signal", correct: true },
+    { text: "Half of the modulating signal", correct: false },
+    { text: "Independent of modulating signal", correct: false }
+  ]
+},
+{
+  question: "Which physical quantity has the unit 'kg·m/s²'?",
+  answers: [
+    { text: "Work", correct: false },
+    { text: "Force", correct: true },
+    { text: "Energy", correct: false },
+    { text: "Power", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a scalar quantity?",
+  answers: [
+    { text: "Velocity", correct: false },
+    { text: "Acceleration", correct: false },
+    { text: "Force", correct: false },
+    { text: "Speed", correct: true }
+  ]
+},
+{
+  question: "The time of flight for projectile motion is maximum when the angle is:",
+  answers: [
+    { text: "30°", correct: false },
+    { text: "45°", correct: false },
+    { text: "90°", correct: true },
+    { text: "0°", correct: false }
+  ]
+},
+{
+  question: "In SHM, when the particle is at mean position, its:",
+  answers: [
+    { text: "Velocity is zero", correct: false },
+    { text: "Acceleration is maximum", correct: false },
+    { text: "Displacement is zero", correct: true },
+    { text: "Potential energy is maximum", correct: false }
+  ]
+},
+{
+  question: "Which law states that pressure is inversely proportional to volume?",
+  answers: [
+    { text: "Charles' Law", correct: false },
+    { text: "Boyle’s Law", correct: true },
+    { text: "Avogadro’s Law", correct: false },
+    { text: "Gay-Lussac’s Law", correct: false }
+  ]
+},
+{
+  question: "Doppler effect is applicable for:",
+  answers: [
+    { text: "Light only", correct: false },
+    { text: "Sound only", correct: false },
+    { text: "Both sound and light", correct: true },
+    { text: "Heat", correct: false }
+  ]
+},
+{
+  question: "The dimensional formula of energy is:",
+  answers: [
+    { text: "ML²T⁻²", correct: true },
+    { text: "MLT⁻²", correct: false },
+    { text: "M²L²T⁻³", correct: false },
+    { text: "MLT⁻¹", correct: false }
+  ]
+},
+{
+  question: "Which device is used to measure current?",
+  answers: [
+    { text: "Voltmeter", correct: false },
+    { text: "Ammeter", correct: true },
+    { text: "Galvanometer", correct: false },
+    { text: "Thermometer", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a non-conservative force?",
+  answers: [
+    { text: "Gravitational force", correct: false },
+    { text: "Friction", correct: true },
+    { text: "Elastic force", correct: false },
+    { text: "Electrostatic force", correct: false }
+  ]
+},
+{
+  question: "The unit of coefficient of friction is:",
+  answers: [
+    { text: "N", correct: false },
+    { text: "kg", correct: false },
+    { text: "No unit", correct: true },
+    { text: "m/s²", correct: false }
+  ]
+},
+{
+  question: "The determinant of a 3x3 identity matrix is:",
+  answers: [
+    { text: "0", correct: false },
+    { text: "1", correct: true },
+    { text: "3", correct: false },
+    { text: "9", correct: false }
+  ]
+},
+{
+  question: "The value of sin²θ + cos²θ is always:",
+  answers: [
+    { text: "0", correct: false },
+    { text: "1", correct: true },
+    { text: "2", correct: false },
+    { text: "-1", correct: false }
+  ]
+},
+{
+  question: "If x = a cos θ and y = a sin θ, then x² + y² equals:",
+  answers: [
+    { text: "a²", correct: true },
+    { text: "a", correct: false },
+    { text: "1", correct: false },
+    { text: "2a²", correct: false }
+  ]
+},
+{
+  question: "The derivative of sin x is:",
+  answers: [
+    { text: "cos x", correct: true },
+    { text: "-cos x", correct: false },
+    { text: "tan x", correct: false },
+    { text: "-sin x", correct: false }
+  ]
+},
+{
+  question: "The integral of 1/x dx is:",
+  answers: [
+    { text: "ln|x| + C", correct: true },
+    { text: "x ln x", correct: false },
+    { text: "1/x", correct: false },
+    { text: "e^x", correct: false }
+  ]
+},
+{
+  question: "The general solution of dy/dx = ky is:",
+  answers: [
+    { text: "y = ke^x", correct: false },
+    { text: "y = Ce^(kx)", correct: true },
+    { text: "y = kx + C", correct: false },
+    { text: "y = Cx^k", correct: false }
+  ]
+},
+{
+  question: "The slope of the tangent to the curve y = x² at x = 2 is:",
+  answers: [
+    { text: "2", correct: false },
+    { text: "4", correct: true },
+    { text: "8", correct: false },
+    { text: "16", correct: false }
+  ]
+},
+{
+  question: "The eccentricity of a circle is:",
+  answers: [
+    { text: "0", correct: true },
+    { text: "1", correct: false },
+    { text: "Infinity", correct: false },
+    { text: "Between 0 and 1", correct: false }
+  ]
+},
+{
+  question: "If A = [1 2; 3 4], then the trace of matrix A is:",
+  answers: [
+    { text: "10", correct: false },
+    { text: "5", correct: true },
+    { text: "4", correct: false },
+    { text: "0", correct: false }
+  ]
+},
+{
+  question: "The binomial expansion of (a + b)² is:",
+  answers: [
+    { text: "a² + b²", correct: false },
+    { text: "a² + 2ab + b²", correct: true },
+    { text: "a² - 2ab + b²", correct: false },
+    { text: "2a² + b²", correct: false }
+  ]
+},
+{
+  question: "Which transmission medium has the highest bandwidth?",
+  answers: [
+    { text: "Twisted pair", correct: false },
+    { text: "Coaxial cable", correct: false },
+    { text: "Optical fiber", correct: true },
+    { text: "Microwave", correct: false }
+  ]
+},
+{
+  question: "Which of the following is not a type of modulation?",
+  answers: [
+    { text: "AM", correct: false },
+    { text: "PM", correct: false },
+    { text: "FM", correct: false },
+    { text: "PCM", correct: true }
+  ]
+},
+{
+  question: "Which power supply circuit converts AC to DC?",
+  answers: [
+    { text: "Rectifier", correct: true },
+    { text: "Oscillator", correct: false },
+    { text: "Amplifier", correct: false },
+    { text: "Filter", correct: false }
+  ]
+},
+{
+  question: "What does Q factor indicate in a resonant circuit?",
+  answers: [
+    { text: "Current gain", correct: false },
+    { text: "Frequency deviation", correct: false },
+    { text: "Selectivity", correct: true },
+    { text: "Impedance", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a linear wave-shaping circuit?",
+  answers: [
+    { text: "Clamper", correct: false },
+    { text: "Clipper", correct: false },
+    { text: "RC integrator", correct: true },
+    { text: "Differential amplifier", correct: false }
+  ]
+},
+{
+  question: "Which register keeps track of the instruction to be executed next?",
+  answers: [
+    { text: "Instruction Register", correct: false },
+    { text: "Program Counter", correct: true },
+    { text: "Stack Pointer", correct: false },
+    { text: "Base Register", correct: false }
+  ]
+},
+{
+  question: "Which component converts light energy into electrical signal?",
+  answers: [
+    { text: "Photodiode", correct: true },
+    { text: "Zener diode", correct: false },
+    { text: "UJT", correct: false },
+    { text: "Transistor", correct: false }
+  ]
+},
+{
+  question: "Which oscillator is used to produce very high frequencies?",
+  answers: [
+    { text: "Phase Shift Oscillator", correct: false },
+    { text: "Colpitts Oscillator", correct: false },
+    { text: "Crystal Oscillator", correct: true },
+    { text: "Wien Bridge Oscillator", correct: false }
+  ]
+},
+{
+  question: "Which modulation technique is most immune to noise?",
+  answers: [
+    { text: "AM", correct: false },
+    { text: "FM", correct: true },
+    { text: "PM", correct: false },
+    { text: "ASK", correct: false }
+  ]
+},
+{
+  question: "Which gate has output HIGH only when both inputs are different?",
+  answers: [
+    { text: "AND gate", correct: false },
+    { text: "OR gate", correct: false },
+    { text: "XOR gate", correct: true },
+    { text: "NOR gate", correct: false }
+  ]
+},
+{
+  question: "What is the output of an OR gate when all inputs are LOW?",
+  answers: [
+    { text: "HIGH", correct: false },
+    { text: "LOW", correct: true },
+    { text: "Unknown", correct: false },
+    { text: "Toggle", correct: false }
+  ]
+},
+{
+  question: "Which among the following is a photoconductive device?",
+  answers: [
+    { text: "LDR", correct: true },
+    { text: "LED", correct: false },
+    { text: "Zener diode", correct: false },
+    { text: "SCR", correct: false }
+  ]
+},
+{
+  question: "Which technique is used in delta modulation?",
+  answers: [
+    { text: "Quantization of amplitude", correct: false },
+    { text: "Sampling at Nyquist rate", correct: false },
+    { text: "Encoding of signal change", correct: true },
+    { text: "Time division multiplexing", correct: false }
+  ]
+},
+{
+  question: "Which transistor configuration has the highest input impedance?",
+  answers: [
+    { text: "CE", correct: false },
+    { text: "CB", correct: false },
+    { text: "CC", correct: true },
+    { text: "Darlington Pair", correct: false }
+  ]
+},
+{
+  question: "Which counter resets itself automatically after reaching a certain count?",
+  answers: [
+    { text: "Ripple counter", correct: false },
+    { text: "Asynchronous counter", correct: false },
+    { text: "Mod-n counter", correct: true },
+    { text: "Ring counter", correct: false }
+  ]
+},
+{
+  question: "Which logic gate is called a universal gate?",
+  answers: [
+    { text: "AND", correct: false },
+    { text: "OR", correct: false },
+    { text: "NAND", correct: true },
+    { text: "XOR", correct: false }
+  ]
+},
+{
+  question: "Which antenna has circular polarization?",
+  answers: [
+    { text: "Folded dipole", correct: false },
+    { text: "Yagi antenna", correct: false },
+    { text: "Helical antenna", correct: true },
+    { text: "Parabolic antenna", correct: false }
+  ]
+},
+{
+  question: "Which technique is used in TDM systems?",
+  answers: [
+    { text: "Different frequencies for each signal", correct: false },
+    { text: "Multiplexing in time slots", correct: true },
+    { text: "Digital to analog conversion", correct: false },
+    { text: "Modulation of frequency", correct: false }
+  ]
+},
+{
+  question: "Which of the following is not a type of oscillator?",
+  answers: [
+    { text: "Hartley", correct: false },
+    { text: "Colpitts", correct: false },
+    { text: "Schmitt Trigger", correct: true },
+    { text: "Wien Bridge", correct: false }
+  ]
+},
+{
+  question: "Which mode does a waveguide operate in by default?",
+  answers: [
+    { text: "TEM", correct: false },
+    { text: "TE", correct: true },
+    { text: "TM", correct: false },
+    { text: "Hybrid", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a secondary memory device?",
+  answers: [
+    { text: "RAM", correct: false },
+    { text: "ROM", correct: false },
+    { text: "Hard Disk", correct: true },
+    { text: "Register", correct: false }
+  ]
+},
+{
+  question: "Which IC is commonly used as an Op-Amp?",
+  answers: [
+    { text: "741", correct: true },
+    { text: "555", correct: false },
+    { text: "4017", correct: false },
+    { text: "8085", correct: false }
+  ]
+},
+{
+  question: "Which layer in the OSI model ensures reliable transmission?",
+  answers: [
+    { text: "Network Layer", correct: false },
+    { text: "Transport Layer", correct: true },
+    { text: "Session Layer", correct: false },
+    { text: "Presentation Layer", correct: false }
+  ]
+},
+{
+  question: "What is the use of a sweep circuit in CRO?",
+  answers: [
+    { text: "Generate sine waves", correct: false },
+    { text: "Generate sawtooth wave for time base", correct: true },
+    { text: "Amplify signals", correct: false },
+    { text: "Generate clock pulses", correct: false }
+  ]
+},
+{
+  question: "Which one is an error detection method?",
+  answers: [
+    { text: "Parity bit", correct: true },
+    { text: "Multiplexing", correct: false },
+    { text: "Modulation", correct: false },
+    { text: "Demodulation", correct: false }
+  ]
+},
+{
+  question: "Which photonic device generates light when forward biased?",
+  answers: [
+    { text: "LDR", correct: false },
+    { text: "LED", correct: true },
+    { text: "Photodiode", correct: false },
+    { text: "Zener diode", correct: false }
+  ]
+},
+{
+  question: "Which device is used to protect circuits from overvoltage?",
+  answers: [
+    { text: "Zener diode", correct: true },
+    { text: "Varactor diode", correct: false },
+    { text: "Tunnel diode", correct: false },
+    { text: "Photodiode", correct: false }
+  ]
+},
+{
+  question: "Which modulation technique varies the amplitude of carrier wave?",
+  answers: [
+    { text: "FM", correct: false },
+    { text: "AM", correct: true },
+    { text: "PM", correct: false },
+    { text: "PCM", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a characteristic of AM signal?",
+  answers: [
+    { text: "Amplitude of carrier changes", correct: true },
+    { text: "Frequency of carrier changes", correct: false },
+    { text: "Phase of carrier changes", correct: false },
+    { text: "Amplitude remains constant", correct: false }
+  ]
+},
+{
+  question: "Which component is used to generate clock pulses?",
+  answers: [
+    { text: "Timer", correct: false },
+    { text: "Crystal oscillator", correct: true },
+    { text: "Rectifier", correct: false },
+    { text: "Diode", correct: false }
+  ]
+},
+{
+  question: "What is the output of a NAND gate when all inputs are HIGH?",
+  answers: [
+    { text: "HIGH", correct: false },
+    { text: "LOW", correct: true },
+    { text: "Undefined", correct: false },
+    { text: "Floating", correct: false }
+  ]
+},
+{
+  question: "Which transistor region is used for amplification?",
+  answers: [
+    { text: "Cut-off", correct: false },
+    { text: "Saturation", correct: false },
+    { text: "Active", correct: true },
+    { text: "Breakdown", correct: false }
+  ]
+},
+{
+  question: "Which type of transmission line has the least loss?",
+  answers: [
+    { text: "Twisted pair", correct: false },
+    { text: "Coaxial cable", correct: false },
+    { text: "Optical fiber", correct: true },
+    { text: "Waveguide", correct: false }
+  ]
+},
+{
+  question: "Which counter uses flip-flops and clock signals directly?",
+  answers: [
+    { text: "Synchronous counter", correct: false },
+    { text: "Asynchronous counter", correct: true },
+    { text: "Johnson counter", correct: false },
+    { text: "Ring counter", correct: false }
+  ]
+},
+{
+  question: "Which IC is a timer?",
+  answers: [
+    { text: "741", correct: false },
+    { text: "8086", correct: false },
+    { text: "555", correct: true },
+    { text: "4011", correct: false }
+  ]
+},
+{
+  question: "Which component stores data temporarily in computers?",
+  answers: [
+    { text: "ROM", correct: false },
+    { text: "EEPROM", correct: false },
+    { text: "RAM", correct: true },
+    { text: "Hard disk", correct: false }
+  ]
+},
+{
+  question: "Which circuit is used to generate square waves?",
+  answers: [
+    { text: "Monostable multivibrator", correct: false },
+    { text: "Astable multivibrator", correct: true },
+    { text: "Schmitt trigger", correct: false },
+    { text: "Differentiator", correct: false }
+  ]
+},
+{
+  question: "Which logic gate is used to detect inequality of inputs?",
+  answers: [
+    { text: "AND", correct: false },
+    { text: "NAND", correct: false },
+    { text: "XOR", correct: true },
+    { text: "NOR", correct: false }
+  ]
+},
+{
+  question: "Which of the following is an edge-triggered device?",
+  answers: [
+    { text: "Counter", correct: false },
+    { text: "Latch", correct: false },
+    { text: "Flip-Flop", correct: true },
+    { text: "Register", correct: false }
+  ]
+},
+{
+  question: "What is the function of a biasing circuit in transistors?",
+  answers: [
+    { text: "To amplify signals", correct: false },
+    { text: "To stabilize operating point", correct: true },
+    { text: "To rectify signals", correct: false },
+    { text: "To suppress noise", correct: false }
+  ]
+},
+{
+  question: "Which particle is not present in the nucleus of an atom?",
+  answers: [
+    { text: "Proton", correct: false },
+    { text: "Neutron", correct: false },
+    { text: "Electron", correct: true },
+    { text: "All are in nucleus", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a strong electrolyte?",
+  answers: [
+    { text: "Glucose", correct: false },
+    { text: "HCl", correct: true },
+    { text: "Acetic acid", correct: false },
+    { text: "Ammonia", correct: false }
+  ]
+},
+{
+  question: "The pH of a neutral solution at 25°C is:",
+  answers: [
+    { text: "0", correct: false },
+    { text: "7", correct: true },
+    { text: "14", correct: false },
+    { text: "1", correct: false }
+  ]
+},
+{
+  question: "Which gas is used in the production of water gas?",
+  answers: [
+    { text: "CO₂", correct: false },
+    { text: "CO", correct: true },
+    { text: "CH₄", correct: false },
+    { text: "O₂", correct: false }
+  ]
+},
+{
+  question: "Which polymer is obtained by condensation reaction?",
+  answers: [
+    { text: "Polyethylene", correct: false },
+    { text: "PVC", correct: false },
+    { text: "Bakelite", correct: true },
+    { text: "Polystyrene", correct: false }
+  ]
+},
+{
+  question: "Which is used to soften hard water?",
+  answers: [
+    { text: "NaCl", correct: false },
+    { text: "CaCO₃", correct: false },
+    { text: "Zeolite", correct: true },
+    { text: "MgSO₄", correct: false }
+  ]
+},
+{
+  question: "Which acid is present in vinegar?",
+  answers: [
+    { text: "Hydrochloric acid", correct: false },
+    { text: "Nitric acid", correct: false },
+    { text: "Acetic acid", correct: true },
+    { text: "Sulphuric acid", correct: false }
+  ]
+},
+{
+  question: "Which of the following is a biodegradable polymer?",
+  answers: [
+    { text: "Teflon", correct: false },
+    { text: "Polyethylene", correct: false },
+    { text: "Polylactic acid", correct: true },
+    { text: "PVC", correct: false }
+  ]
+},
+{
+  question: "Electrochemical series helps to predict:",
+  answers: [
+    { text: "Molecular shape", correct: false },
+    { text: "Boiling point", correct: false },
+    { text: "Electrode potential", correct: true },
+    { text: "Melting point", correct: false }
+  ]
+},
+{
+  question: "Which of the following causes temporary hardness of water?",
+  answers: [
+    { text: "CaSO₄", correct: false },
+    { text: "MgCl₂", correct: false },
+    { text: "Ca(HCO₃)₂", correct: true },
+    { text: "NaCl", correct: false }
+  ]
+},
+{
+  question: "Which of these is a single-mode propagation structure?",
+  answers: [
+    { text: "Twisted pair", correct: false },
+    { text: "Single-mode fiber", correct: true },
+    { text: "Coaxial cable", correct: false },
+    { text: "Multimode fiber", correct: false }
+  ]
+},
+{
+  question: "Which device has negative resistance region in its VI characteristic?",
+  answers: [
+    { text: "Zener diode", correct: false },
+    { text: "Tunnel diode", correct: true },
+    { text: "PN diode", correct: false },
+    { text: "Photodiode", correct: false }
+  ]
+},
+{
+  question: "Which flip-flop has a single data input and stores one bit?",
+  answers: [
+    { text: "D flip-flop", correct: true },
+    { text: "T flip-flop", correct: false },
+    { text: "JK flip-flop", correct: false },
+    { text: "SR flip-flop", correct: false }
+  ]
+},
+{
+  question: "Which amplifier configuration provides unity gain?",
+  answers: [
+    { text: "Common Base", correct: false },
+    { text: "Common Collector", correct: true },
+    { text: "Common Emitter", correct: false },
+    { text: "Push-Pull", correct: false }
+  ]
+},
+{
+  question: "Which modulation is used in TV video transmission?",
+  answers: [
+    { text: "FM", correct: false },
+    { text: "AM", correct: true },
+    { text: "PM", correct: false },
+    { text: "PCM", correct: false }
+  ]
+},
+{
+  question: "Which circuit is used to produce a delayed pulse?",
+  answers: [
+    { text: "Monostable multivibrator", correct: true },
+    { text: "Astable multivibrator", correct: false },
+    { text: "Differentiator", correct: false },
+    { text: "Schmitt trigger", correct: false }
+  ]
+},
+{
+  question: "Which element stores energy in magnetic field?",
+  answers: [
+    { text: "Capacitor", correct: false },
+    { text: "Inductor", correct: true },
+    { text: "Resistor", correct: false },
+    { text: "Transformer", correct: false }
+  ]
+},
+{
+  question: "Which coding technique is used in digital data transmission?",
+  answers: [
+    { text: "Gray code", correct: false },
+    { text: "BCD", correct: false },
+    { text: "NRZ", correct: true },
+    { text: "1's complement", correct: false }
+  ]
+},
+{
+  question: "Which part of a microprocessor executes instructions?",
+  answers: [
+    { text: "ALU", correct: true },
+    { text: "RAM", correct: false },
+    { text: "ROM", correct: false },
+    { text: "Clock generator", correct: false }
+  ]
+},
+{
+  question: "What is the purpose of a rectifier in a power supply?",
+  answers: [
+    { text: "To convert AC to DC", correct: true },
+    { text: "To amplify AC", correct: false },
+    { text: "To regulate voltage", correct: false },
+    { text: "To invert polarity", correct: false }
+  ]
+},
+{
+  question: "Which component is used in pulse-width modulation in inverters?",
+  answers: [
+    { text: "SCR", correct: false },
+    { text: "MOSFET", correct: true },
+    { text: "Zener diode", correct: false },
+    { text: "Triac", correct: false }
+  ]
+},
+{
+  question: "Which parameter represents the signal-to-noise ratio?",
+  answers: [
+    { text: "Gain", correct: false },
+    { text: "Efficiency", correct: false },
+    { text: "SNR", correct: true },
+    { text: "Impedance", correct: false }
+  ]
+},
+{
+  question: "What does EEPROM stand for?",
+  answers: [
+    { text: "Erasable Electrical Programmable Read Only Memory", correct: true },
+    { text: "Extended Electrical ROM", correct: false },
+    { text: "Electronic Erase RAM", correct: false },
+    { text: "Embedded Electrical ROM", correct: false }
+  ]
+},
+{
+  question: "Which protocol is used for secure file transfer?",
+  answers: [
+    { text: "FTP", correct: false },
+    { text: "HTTP", correct: false },
+    { text: "SFTP", correct: true },
+    { text: "SMTP", correct: false }
+  ]
+},
+{
+  question: "Which number system is base-16?",
+  answers: [
+    { text: "Decimal", correct: false },
+    { text: "Binary", correct: false },
+    { text: "Hexadecimal", correct: true },
+    { text: "Octal", correct: false }
+  ]
+},
+{
+  question: "Which signal has a constant amplitude but varying frequency?",
+  answers: [
+    { text: "AM", correct: false },
+    { text: "FM", correct: true },
+    { text: "PM", correct: false },
+    { text: "QAM", correct: false }
+  ]
+},
+{
+  question: "Which power amplifier class is most efficient?",
+  answers: [
+    { text: "Class A", correct: false },
+    { text: "Class B", correct: false },
+    { text: "Class C", correct: true },
+    { text: "Class AB", correct: false }
+  ]
+},
+{
+  question: "What is the primary use of a superheterodyne receiver?",
+  answers: [
+    { text: "To transmit signals", correct: false },
+    { text: "To convert high-frequency signals to intermediate frequency", correct: true },
+    { text: "To amplify signals", correct: false },
+    { text: "To digitize analog signals", correct: false }
+  ]
+},
+{
+  question: "Which register in 8086 is used for stack operations?",
+  answers: [
+    { text: "SI", correct: false },
+    { text: "DI", correct: false },
+    { text: "SP", correct: true },
+    { text: "IP", correct: false }
+  ]
+},
+  {
+    question: "Which topology uses a central hub to connect all devices?",
+    answers: [
+      { text: "Ring", correct: false },
+      { text: "Bus", correct: false },
+      { text: "Mesh", correct: false },
+      { text: "Star", correct: true }
+    ]
+  }
+];
+
+    const questionElement = document.getElementById("question");
+    const answerButtons = document.getElementById("answer-buttons");
+    const nextButton = document.getElementById("next-btn");
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      nextButton.innerText = "Next";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      resetState();
+      const currentQuestion = questions[currentQuestionIndex];
+      questionElement.innerText = currentQuestion.question;
+
+      currentQuestion.answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.innerText = answer.text;
+        button.classList.add("btn");
+        button.addEventListener("click", () => selectAnswer(answer));
+        answerButtons.appendChild(button);
+      });
+    }
+
+    function resetState() {
+      nextButton.style.display = "none";
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild);
+      }
+    }
+
+    function selectAnswer(answer) {
+      const buttons = answerButtons.children;
+      for (let btn of buttons) {
+        const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === btn.innerText).correct;
+        btn.classList.add(isCorrect ? "correct" : "wrong");
+      }
+
+      if (answer.correct) score++;
+      nextButton.style.display = "inline-block";
+    }
+
+    function handleNextButton() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion();
+      } else {
+        showScore();
+      }
+    }
+
+    function showScore() {
+      resetState();
+      questionElement.innerText = `🎉 You scored ${score} out of ${questions.length}!`;
+      nextButton.innerText = "Play Again";
+      nextButton.style.display = "inline-block";
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (currentQuestionIndex < questions.length) {
+        handleNextButton();
+      } else {
+        startQuiz();
+      }
+    });
+
+    startQuiz();
+  </script>
+</body>
+</html>
