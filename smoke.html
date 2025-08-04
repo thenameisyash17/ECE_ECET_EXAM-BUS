@@ -1,22 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>System Error</title>
   <style>
     body {
+      margin: 0;
+      padding: 0;
       background-color: #0000aa;
       color: white;
       font-family: Consolas, monospace;
-      font-size: 18px;
-      padding: 50px;
-    }
-    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
-      margin-top: 100px;
     }
+
+    .center {
+      padding: 20px;
+    }
+
     .big {
-      font-size: 24px;
+      font-size: 5vw; /* Responsive text */
+    }
+
+    p {
+      font-size: 4vw;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 768px) {
+      .big {
+        font-size: 24px;
+      }
+
+      p {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -40,20 +62,20 @@
         setTimeout(() => {
           document.body.innerHTML = `
             <div class="center">
-              <h1>✅ Data transfer successfully</h1>
-              <p>All files sent to Yash's device.</p>
-              <p>Refresh the page to reset.</p>
+              <h1 style="font-size: 5vw;">✅ Data transfer successfully</h1>
+              <p style="font-size: 4vw;">All files sent to Yash's device.</p>
+              <p style="font-size: 4vw;">Refresh the page to reset.</p>
             </div>
           `;
 
-          // After 4 seconds, show prank alert and redirect
           setTimeout(() => {
             alert("😄 This was a prank! Redirecting to the quiz...");
-            window.location.href = "quiz.html"; // Redirect to your quiz
+            window.location.href = "quiz.html";
           }, 4000);
-        }, 2000); // Delay after loading 100%
+        }, 2000);
       }
-    }, 150); // 150ms x 100 = 15s progress duration
+    }, 150);
   </script>
 </body>
 </html>
+
